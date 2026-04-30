@@ -1,0 +1,140 @@
+{
+  "batch_out_dir": "outputs\\batch_viz_map_v2_5slots",
+  "cases": [
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 0,
+      "message": "planned: fwd=84.549 m, rev=11.064 m, |steer|<=35 deg",
+      "row": 0,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r0_i0.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 1,
+      "message": "planned: fwd=79.749 m, rev=11.064 m, |steer|<=35 deg",
+      "row": 0,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r0_i1.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=7, sensor=off",
+      "index": 4,
+      "message": "planned: fwd=70.428 m, rev=15.864 m, |steer|<=35 deg",
+      "row": 0,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r0_i4.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 3,
+      "message": "planned: fwd=70.428 m, rev=10.517 m, |steer|<=35 deg",
+      "row": 1,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r1_i3.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 4,
+      "message": "planned: fwd=70.428 m, rev=15.317 m, |steer|<=35 deg",
+      "row": 1,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r1_i4.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 0,
+      "message": "planned: fwd=15.2 m, rev=11.498 m, |steer|<=35 deg",
+      "row": 2,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r2_i0.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 1,
+      "message": "planned: fwd=20 m, rev=11.498 m, |steer|<=35 deg",
+      "row": 2,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r2_i1.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 2,
+      "message": "planned: fwd=24.8 m, rev=11.498 m, |steer|<=35 deg",
+      "row": 2,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r2_i2.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 3,
+      "message": "planned: fwd=29.6 m, rev=11.498 m, |steer|<=35 deg",
+      "row": 2,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r2_i3.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 0,
+      "message": "planned: fwd=15.2 m, rev=10.097 m, |steer|<=35 deg",
+      "row": 3,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r3_i0.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 1,
+      "message": "planned: fwd=20 m, rev=10.097 m, |steer|<=35 deg",
+      "row": 3,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r3_i1.svg",
+      "svg_ok": true
+    },
+    {
+      "collision_model_debug": "forward_forbidden=19, reverse_forbidden=8, sensor=off",
+      "index": 3,
+      "message": "planned: fwd=29.6 m, rev=10.097 m, |steer|<=35 deg",
+      "row": 3,
+      "sim_message": "ok",
+      "sim_success": true,
+      "success": true,
+      "svg": "outputs\\batch_viz_map_v2_5slots/viz_r3_i3.svg",
+      "svg_ok": true
+    }
+  ],
+  "failed_count": 0,
+  "free_slots_tested": 12,
+  "map": "data\\parking_map_v2.json"
+}
