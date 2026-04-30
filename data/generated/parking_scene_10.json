@@ -1,0 +1,139 @@
+{
+  "map": {
+    "width": 75,
+    "height": 50
+  },
+  "map_width": 75,
+  "map_height": 50,
+  "roads": [
+    {
+      "id": "lower_main_lane",
+      "x": 0,
+      "y": 9,
+      "w": 75,
+      "h": 6,
+      "direction": 1
+    },
+    {
+      "id": "upper_main_lane",
+      "x": 16,
+      "y": 34.5,
+      "w": 59,
+      "h": 6,
+      "direction": -1
+    },
+    {
+      "id": "right_connector",
+      "x": 60,
+      "y": 12,
+      "w": 6,
+      "h": 25.5,
+      "direction": 0
+    }
+  ],
+  "obstacles": [],
+  "parking": {
+    "start_x": 12,
+    "slot_count": 10,
+    "slot_width": 4.8,
+    "slot_depth": 6.0,
+    "top_outer_baseline_y": 50.0,
+    "middle_upper_baseline_y": 25.0,
+    "middle_lower_baseline_y": 25.0,
+    "bottom_outer_baseline_y": 0.0
+  },
+  "occupied_slots": [
+    {
+      "row": 0,
+      "index": 6
+    },
+    {
+      "row": 0,
+      "index": 7
+    },
+    {
+      "row": 0,
+      "index": 8
+    },
+    {
+      "row": 1,
+      "index": 1
+    },
+    {
+      "row": 1,
+      "index": 2
+    },
+    {
+      "row": 1,
+      "index": 5
+    },
+    {
+      "row": 1,
+      "index": 7
+    },
+    {
+      "row": 2,
+      "index": 1
+    },
+    {
+      "row": 2,
+      "index": 3
+    },
+    {
+      "row": 2,
+      "index": 4
+    },
+    {
+      "row": 2,
+      "index": 5
+    },
+    {
+      "row": 2,
+      "index": 6
+    },
+    {
+      "row": 2,
+      "index": 8
+    },
+    {
+      "row": 3,
+      "index": 0
+    },
+    {
+      "row": 3,
+      "index": 1
+    },
+    {
+      "row": 3,
+      "index": 6
+    },
+    {
+      "row": 3,
+      "index": 8
+    }
+  ],
+  "target_slots": [
+    {
+      "row": 0,
+      "index": 5,
+      "label": "Goal 1"
+    },
+    {
+      "row": 0,
+      "index": 9,
+      "label": "Goal 2"
+    },
+    {
+      "row": 3,
+      "index": 7,
+      "label": "Goal 3"
+    }
+  ],
+  "ego_vehicle": {
+    "x": 4.0,
+    "y": 12.0,
+    "theta": 0.0,
+    "length": 4.8,
+    "width": 2.0
+  }
+}

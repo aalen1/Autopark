@@ -1,0 +1,26 @@
+{
+  "timestamp_s": 12.4,
+  "frame_id": "base_link",
+  "detections": [
+    {
+      "cx": 30.5,
+      "cy": 12.3,
+      "w": 2.0,
+      "h": 4.6,
+      "vx": 0.0,
+      "vy": 0.0,
+      "confidence": 0.95,
+      "label": "parked_car"
+    },
+    {
+      "cx": 45.2,
+      "cy": 14.0,
+      "w": 0.8,
+      "h": 0.8,
+      "vx": -0.5,
+      "vy": 0.1,
+      "confidence": 0.82,
+      "label": "pedestrian"
+    }
+  ]
+}
