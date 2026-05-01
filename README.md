@@ -83,7 +83,7 @@ Use this sequence in the terminal after TUI starts:
 
 ---
 
-## Original Map Full Test (Only One Method Kept)
+## Original Map Full Test
 
 Run the complete batch test on the original map:
 
