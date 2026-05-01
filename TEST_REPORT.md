@@ -20,7 +20,7 @@
 |------|------|
 | 編譯器 | 支援 **C++17** 的編譯器（如 MSVC、GCC、Clang） |
 | CMake | **3.20** 或以上 |
-| 網路 | **不需要**：`nlohmann/json` 已置於 `third_party/nlohmann_json/single_include/` |
+| 網路 | **不需要**：`nlohmann/json` 已置於 `third party/nlohmann/` |
 | 場景檔 | 預設使用 **`autopark_cpp/data/parking_scene.json`**（執行時工作目錄應為 `autopark_cpp/`，相對路徑 `data/parking_scene.json`） |
 
 ---
@@ -53,7 +53,7 @@
 ### 3.3 失敗時檢查
 
 - 找不到編譯器：確認 PATH 或於 IDE 開發者命令提示字元執行。
-- 找不到 `nlohmann/json.hpp`：確認 `third_party/nlohmann_json/single_include/nlohmann/json.hpp` 存在且未被刪除。
+- 找不到 `nlohmann/json.hpp`：確認 `third party/nlohmann/json.hpp` 存在且未被刪除。
 
 ---
 

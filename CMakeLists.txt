@@ -21,5 +21,5 @@ target_include_directories(
   autopark_run
   PRIVATE
     include
-    "${CMAKE_CURRENT_SOURCE_DIR}/third_party/nlohmann_json/single_include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/third party"
 )

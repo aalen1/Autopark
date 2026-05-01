@@ -19,7 +19,7 @@ It supports both custom scenario testing and batch testing on a standard map, ai
 - MinGW-w64 (or another C++17 compiler) with `g++` on `PATH`
 - PowerShell or CMD
 - Vendored JSON header present at:
-  - `third_party\nlohmann_json\single_include\nlohmann\json.hpp`
+  - `third party\nlohmann\json.hpp`
 
 ---
 
@@ -30,7 +30,7 @@ Run from the `Autopark` folder:
 ```powershell
 cd "C:\Users\aalen\Desktop\556\autopark\autopark_cpp\Autopark"
 mkdir build -Force > $null
-g++ -std=c++17 -O2 -Iinclude -Ithird_party/nlohmann_json/single_include src/main.cpp src/geometry_lane.cpp src/connector_transfer.cpp src/forward_overshoot.cpp src/reverse_bezier.cpp src/viz_svg.cpp src/axis_fillet.cpp src/bicycle_sim.cpp src/parking_simulate.cpp -o build/autopark_run.exe
+g++ -std=c++17 -O2 -Iinclude -I"third party" src/main.cpp src/geometry_lane.cpp src/connector_transfer.cpp src/forward_overshoot.cpp src/reverse_bezier.cpp src/viz_svg.cpp src/axis_fillet.cpp src/bicycle_sim.cpp src/parking_simulate.cpp -o build/autopark_run.exe
 ```
 
 Verify:
