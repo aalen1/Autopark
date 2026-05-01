@@ -456,11 +456,36 @@ bool SaveParkingPlotSvg(
   body << "</g>\n";
 
   std::ostringstream title;
-  const bool sim_ok = res.sim_success;
-  title << "Parking | target row=" << tr << " idx=" << ti << " | success=" << (res.success ? "true" : "false")
-        << " sim_ok=" << (sim_ok ? "true" : "false") << " | max_steer=" << static_cast<int>(max_steer_deg + 0.5)
-        << " deg | overshoot~=" << std::setprecision(1) << overshoot_m << " m | total(ref)~=" << std::setprecision(1)
-        << (fwd_len + rev_len) << " m";
+  const size_t sim_steps_total = res.sim_forward.size() + res.sim_reverse.size();
+  double final_x = ex;
+  double final_y = ey;
+  double final_yaw = e_yaw;
+  if (!res.sim_reverse.empty()) {
+    const auto& lp = res.sim_reverse.back();
+    final_x = lp.x;
+    final_y = lp.y;
+    final_yaw = lp.yaw;
+  } else if (!res.reverse_polyline.empty()) {
+    const auto& lp = res.reverse_polyline.back();
+    final_x = lp.x;
+    final_y = lp.y;
+    final_yaw = sy;
+  } else if (!res.sim_forward.empty()) {
+    const auto& lp = res.sim_forward.back();
+    final_x = lp.x;
+    final_y = lp.y;
+    final_yaw = lp.yaw;
+  } else if (!res.forward_polyline.empty()) {
+    const auto& lp = res.forward_polyline.back();
+    final_x = lp.x;
+    final_y = lp.y;
+  }
+  title << "Target slot: (" << tr << "," << ti << ")"
+        << " | Sim steps total: " << sim_steps_total
+        << " | Final pose: x=" << std::setprecision(2) << final_x
+        << ", y=" << final_y
+        << ", yaw=" << std::setprecision(3) << final_yaw << " rad"
+        << " | Success: " << (res.success ? "true" : "false");
   std::string note;
   if (!res.sim_message.empty()) {
     note = res.sim_message;  // Prefer simulator status text.

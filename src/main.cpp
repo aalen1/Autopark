@@ -23,9 +23,11 @@
 // =============================================================================
 
 #include <cstdlib>
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <set>
 #include <sstream>
@@ -77,6 +79,9 @@ struct Args {
   /// When set: for each unoccupied slot run plan + sim and write one SVG plus batch summary.
   bool batch_viz{false};
   std::string batch_out_dir{"outputs/batch_viz"};
+  /// Interactive text mode to configure row_count/slot_count/target and run once.
+  bool tui{false};
+  std::string custom_map_out{"outputs/custom_map.json"};
 };
 
 // =============================================================================
@@ -374,6 +379,12 @@ std::optional<Args> ParseArgs(int argc, char** argv) {
       auto v = need("--batch-out-dir");
       if (!v.has_value()) return std::nullopt;
       a.batch_out_dir = *v;
+    } else if (k == "--tui") {
+      a.tui = true;
+    } else if (k == "--custom-map-out") {
+      auto v = need("--custom-map-out");
+      if (!v.has_value()) return std::nullopt;
+      a.custom_map_out = *v;
     } else if (k == "-h" || k == "--help") {
       std::cout
           << "autopark_run options:\n"
@@ -390,6 +401,8 @@ std::optional<Args> ParseArgs(int argc, char** argv) {
           << "  --plan-row0             override target with first free slot in row0\n"
           << "  --batch-viz             all unoccupied slots: plan+sim each, write SVG + batch summary.json\n"
           << "  --batch-out-dir <path>  batch SVG/summary directory (default: outputs/batch_viz)\n"
+          << "  --tui                   interactive TUI main menu (configure map/target and run)\n"
+          << "  --custom-map-out <path> TUI-generated map json path (default: outputs/custom_map.json)\n"
           << "Note: default paths assume current working directory is the autopark_cpp/ project folder.\n";
       return std::nullopt;
     } else {
@@ -427,6 +440,191 @@ void EnsureParentDir(const std::string& p) {
   const std::string cmd = "mkdir -p \"" + dir + "\"";
 #endif
   std::ignore = std::system(cmd.c_str());
+}
+
+bool PromptIntInRange(const std::string& label, int lo, int hi, int& out) {
+  while (true) {
+    std::cout << label;
+    int v = 0;
+    if (std::cin >> v) {
+      if (v >= lo && v <= hi) {
+        out = v;
+        return true;
+      }
+      std::cout << "[error] value out of range (" << lo << "..." << hi << ")\n";
+    } else {
+      if (std::cin.eof()) return false;
+      std::cout << "[error] invalid integer input\n";
+    }
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+  }
+}
+
+json BuildAutoTargetPoseFromSlot(const json& parking_cfg, int row, int idx) {
+  const ap::Rect slot = ap::SlotRect(parking_cfg, row, idx);
+  const double target_x = slot.x + 0.5 * slot.w;
+  const double target_y = slot.y + 0.55 * slot.h;
+  const double target_theta = ap::SlotYaw(row);
+  return json{
+      {"x", target_x},
+      {"y", target_y},
+      {"theta", target_theta},
+      {"row", row},
+      {"index", idx},
+      {"auto_generated", true},
+  };
+}
+
+void AutoExpandMapAndRoadsForSlotCount(json& scene, int slot_count) {
+  const json parking_cfg = scene.value("parking", json::object());
+  const double start_x = parking_cfg.value("start_x", 12.0);
+  const double slot_w = parking_cfg.value("slot_width", 4.8);
+  const double required_slot_right = start_x + static_cast<double>(slot_count) * slot_w;
+  const double connector_gap = 0.2;
+  const double map_right_margin = 3.0;
+
+  double map_w = scene.value("map_width", 75.0);
+  if (scene.contains("map") && scene.at("map").is_object()) {
+    map_w = scene.at("map").value("width", map_w);
+  }
+  double connector_w = 6.0;
+  if (scene.contains("roads") && scene.at("roads").is_array()) {
+    for (const auto& rd : scene.at("roads")) {
+      if (rd.value("id", "") == "right_connector") {
+        connector_w = rd.value("w", connector_w);
+        break;
+      }
+    }
+  }
+  const double connector_x = required_slot_right + connector_gap;
+  const double target_map_w = std::max(map_w, connector_x + connector_w + map_right_margin);
+  scene["map_width"] = target_map_w;
+  scene["map"]["width"] = target_map_w;
+
+  if (!scene.contains("roads") || !scene.at("roads").is_array()) {
+    return;
+  }
+  json roads = scene.at("roads");
+  for (auto& rd : roads) {
+    const std::string id = rd.value("id", "");
+    if (id == "lower_main_lane" || id == "upper_main_lane") {
+      rd["x"] = 0.0;
+      rd["w"] = target_map_w;
+    } else if (id == "right_connector") {
+      rd["x"] = connector_x;
+    }
+  }
+  scene["roads"] = roads;
+}
+
+bool ConfigureSceneWithTui(json& scene, Args& args) {
+  std::cout << "\n=== Autopark TUI (Custom Map) ===\n";
+  std::cout << "Main menu (loop): configure map and target slot, then run.\n";
+
+  int row_count = scene.value("parking", json::object()).value("row_count", 4);
+  row_count = static_cast<int>(ap::Clamp(static_cast<double>(row_count), 1.0, 4.0));
+  int slot_count = scene.value("parking", json::object()).value("slot_count", 10);
+  slot_count = static_cast<int>(ap::Clamp(static_cast<double>(slot_count), 1.0, 20.0));
+
+  int target_row = 0;
+  int target_idx = 0;
+  if (scene.contains("target_slots") && scene.at("target_slots").is_array() && !scene.at("target_slots").empty()) {
+    target_row = scene.at("target_slots")[0].value("row", 0);
+    target_idx = scene.at("target_slots")[0].value("index", 0);
+  }
+  target_row = static_cast<int>(ap::Clamp(static_cast<double>(target_row), 0.0, static_cast<double>(row_count - 1)));
+  target_idx = static_cast<int>(ap::Clamp(static_cast<double>(target_idx), 0.0, static_cast<double>(slot_count - 1)));
+
+  while (true) {
+    std::cout << "\n--- TUI Menu ---\n";
+    std::cout << "1) Set row count (1-4)\n";
+    std::cout << "2) Set slots per row (1-20)\n";
+    std::cout << "3) Set target slot (row, index)\n";
+    std::cout << "4) Show current settings\n";
+    std::cout << "5) Run planning and export files\n";
+    std::cout << "0) Exit TUI\n";
+    int menu = -1;
+    if (!PromptIntInRange("Select menu: ", 0, 5, menu)) return false;
+    if (menu == 0) return false;
+
+    if (menu == 1) {
+      if (!PromptIntInRange("Row count (1-4): ", 1, 4, row_count)) return false;
+      target_row = static_cast<int>(ap::Clamp(static_cast<double>(target_row), 0.0, static_cast<double>(row_count - 1)));
+      continue;
+    }
+    if (menu == 2) {
+      if (!PromptIntInRange("Slots per row (1-20): ", 1, 20, slot_count)) return false;
+      target_idx = static_cast<int>(ap::Clamp(static_cast<double>(target_idx), 0.0, static_cast<double>(slot_count - 1)));
+      continue;
+    }
+    if (menu == 3) {
+      if (!PromptIntInRange("Target row (0-based): ", 0, row_count - 1, target_row)) return false;
+      if (!PromptIntInRange("Target index (0-based): ", 0, slot_count - 1, target_idx)) return false;
+      continue;
+    }
+
+    json preview = scene;
+    preview["parking"]["row_count"] = row_count;
+    preview["parking"]["slot_count"] = slot_count;
+    AutoExpandMapAndRoadsForSlotCount(preview, slot_count);
+    const json target_pose = BuildAutoTargetPoseFromSlot(preview.at("parking"), target_row, target_idx);
+
+    const double start_x = preview.at("parking").value("start_x", 12.0);
+    const double slot_w = preview.at("parking").value("slot_width", 4.8);
+    const double last_slot_right = start_x + static_cast<double>(slot_count) * slot_w;
+    double connector_x = 0.0;
+    for (const auto& rd : preview.value("roads", json::array())) {
+      if (rd.value("id", "") == "right_connector") {
+        connector_x = rd.value("x", connector_x);
+        break;
+      }
+    }
+    const double map_w = preview.value("map_width", preview.value("map", json::object()).value("width", 75.0));
+
+    if (menu == 4) {
+      std::cout << "[info] row_count=" << row_count << ", slot_count=" << slot_count
+                << ", target=(" << target_row << "," << target_idx << ")\n";
+      std::cout << "[info] target pose(auto): x=" << target_pose.at("x").get<double>()
+                << ", y=" << target_pose.at("y").get<double>()
+                << ", theta(rad)=" << target_pose.at("theta").get<double>() << "\n";
+      std::cout << "[info] geometry summary: last_slot_right=" << last_slot_right
+                << ", connector_x=" << connector_x
+                << ", map_width=" << map_w << "\n";
+      continue;
+    }
+
+    scene = std::move(preview);
+    scene["target_slots"] = json::array({{{"row", target_row}, {"index", target_idx}, {"label", "TUI Goal"}}});
+    scene["target_pose"] = target_pose;
+    scene["occupied_slots"] = json::array();
+
+    std::ostringstream out_json;
+    out_json << "outputs/custom_result_r" << target_row << "_i" << target_idx << ".json";
+    args.out = out_json.str();
+    std::ostringstream out_svg;
+    out_svg << "outputs/custom_plot_r" << target_row << "_i" << target_idx << ".svg";
+    args.plot_out = out_svg.str();
+
+    EnsureParentDir(args.custom_map_out);
+    std::ofstream mf(args.custom_map_out);
+    if (!mf) {
+      std::cerr << "[error] cannot write TUI map file: " << args.custom_map_out << "\n";
+      return false;
+    }
+    mf << scene.dump(2) << "\n";
+
+    std::cout << "[info] target pose auto-generated from slot: x=" << target_pose.at("x").get<double>()
+              << ", y=" << target_pose.at("y").get<double>()
+              << ", theta(rad)=" << target_pose.at("theta").get<double>() << "\n";
+    std::cout << "[info] geometry summary: last_slot_right=" << last_slot_right
+              << ", connector_x=" << connector_x
+              << ", map_width=" << map_w << "\n";
+    std::cout << "[ok] wrote custom map: " << args.custom_map_out << "\n";
+    std::cout << "[ok] output json: " << args.out << "\n";
+    std::cout << "[ok] output svg : " << args.plot_out << "\n";
+    return true;
+  }
 }
 
 bool InjectSensorFrameIntoScene(const Args& args, json& scene) {
@@ -591,7 +789,7 @@ int RunBatchVizAllSlots(const json& scene_base, const Args& args) {
 int main(int argc, char** argv) {
   const auto args_opt = ParseArgs(argc, argv);
   if (!args_opt.has_value()) return 0;
-  const Args args = *args_opt;
+  Args args = *args_opt;
 
   // --- Load scene JSON from --map ---
   std::ifstream fin(args.map);
@@ -610,6 +808,13 @@ int main(int argc, char** argv) {
 
   if (!InjectSensorFrameIntoScene(args, scene)) {
     return 1;
+  }
+
+  if (args.tui) {
+    if (!ConfigureSceneWithTui(scene, args)) {
+      std::cerr << "[info] TUI canceled.\n";
+      return 1;
+    }
   }
 
   // --- Batch mode: all free slots → SVGs + summary.json ---
